@@ -5,27 +5,10 @@ services:
     build: ./backend
     ports:
       - "5000:5000"
-    env_file:
-      - ./backend/.env
     depends_on:
-      - db
-    command: ["sh", "-c", "psql -h db -U user -d dam -f /app/db/schema.sql && node src/index.js"]
+      - frontend
 
   frontend:
     build: ./frontend
     ports:
-      - "3000:3000"
-    depends_on:
-      - backend
-
-  db:
-    image: postgres:13
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: dam
-    volumes:
-      - db_data:/var/lib/postgresql/data
-
-volumes:
-  db_data:
+      - "3000:80"

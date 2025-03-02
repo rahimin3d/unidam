@@ -1,21 +1,11 @@
-# Use an official node image as the base image
-FROM node:14-alpine
+# Use an official nginx image as the base image
+FROM nginx:alpine
 
-# Set the working directory
-WORKDIR /app
-
-# Copy package.json and package-lock.json
-COPY package.json ./
-COPY package-lock.json ./
-
-# Install dependencies
-RUN npm install
-
-# Copy the rest of the application code
-COPY . .
+# Copy the frontend build to the nginx html directory
+COPY public /usr/share/nginx/html
 
 # Expose the port the app runs on
-EXPOSE 3000
+EXPOSE 80
 
-# Start the application
-CMD ["npm", "start"]
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]
