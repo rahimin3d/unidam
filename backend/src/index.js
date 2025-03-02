@@ -10,11 +10,11 @@ const port = 5000;
 
 // PostgreSQL setup
 const pool = new Pool({
-  user: 'user',
-  host: 'localhost',
-  database: 'dam',
-  password: 'password',
-  port: 5432,
+  user: process.env.POSTGRES_USER,
+  host: process.env.POSTGRES_HOST,
+  database: process.env.POSTGRES_DB,
+  password: process.env.POSTGRES_PASSWORD,
+  port: process.env.POSTGRES_PORT,
 });
 
 // Middleware for parsing JSON and form-data

@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS resources (
+    id UUID PRIMARY KEY,
+    path TEXT NOT NULL,
+    original_name TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

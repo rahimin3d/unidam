@@ -9,6 +9,7 @@ services:
       - ./backend/.env
     depends_on:
       - db
+    command: ["sh", "-c", "psql -h db -U user -d dam -f /app/db/schema.sql && node src/index.js"]
 
   frontend:
     build: ./frontend
