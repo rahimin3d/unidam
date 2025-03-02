@@ -4,9 +4,13 @@ const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 const fs = require('fs');
 const { Pool } = require('pg');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
 
 const app = express();
 const port = 5000;
+const secretKey = 'your_secret_key';
 
 // PostgreSQL setup
 const pool = new Pool({
@@ -44,8 +48,71 @@ const generateObfuscatedPath = (resourceId) => {
   return path.join(...reverseId.split(''), `_${randomString}`);
 };
 
-// Endpoint to upload files
-app.post('/upload', upload.single('file'), async (req, res) => {
+// User registration endpoint
+app.post('/register', async (req, res) => {
+  const { username, password, isAdmin } = req.body;
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await pool.query('INSERT INTO users (username, password, is_admin) VALUES ($1, $2, $3)', [username, hashedPassword, isAdmin]);
+    res.status(201).send('User registered successfully');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error registering user');
+  }
+});
+
+// User login endpoint
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+    const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+    if (result.rows.length === 0) {
+      return res.status(400).send('Invalid username or password');
+    }
+
+    const user = result.rows[0];
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(400).send('Invalid username or password');
+    }
+
+    const token = jwt.sign({ userId: user.id, isAdmin: user.is_admin }, secretKey, { expiresIn: '1h' });
+    res.status(200).json({ token });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error logging in');
+  }
+});
+
+// Middleware to authenticate requests
+const authenticate = (req, res, next) => {
+  const token = req.headers['authorization'];
+  if (!token) {
+    return res.status(401).send('Access denied');
+  }
+
+  try {
+    const decoded = jwt.verify(token, secretKey);
+    req.userId = decoded.userId;
+    req.isAdmin = decoded.isAdmin;
+    next();
+  } catch (error) {
+    res.status(401).send('Invalid token');
+  }
+};
+
+// Middleware to authorize admin requests
+const authorizeAdmin = (req, res, next) => {
+  if (!req.isAdmin) {
+    return res.status(403).send('Access denied');
+  }
+  next();
+};
+
+// Endpoint to upload files (authenticated)
+app.post('/upload', authenticate, upload.single('file'), async (req, res) => {
   const { file } = req;
   const { option } = req.body;
 
@@ -75,8 +142,8 @@ app.post('/upload', upload.single('file'), async (req, res) => {
   }
 });
 
-// Endpoint to list files
-app.get('/files', async (req, res) => {
+// Endpoint to list files (authenticated)
+app.get('/files', authenticate, async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM resources');
     return res.status(200).json(result.rows);
@@ -84,6 +151,29 @@ app.get('/files', async (req, res) => {
     console.error(error);
     return res.status(500).send('Error fetching files.');
   }
+});
+
+// Admin endpoint to manage jobs (authorized)
+app.get('/admin/jobs', authenticate, authorizeAdmin, async (req, res) => {
+  // Placeholder for job management logic
+  res.status(200).send('List of jobs');
+});
+
+// Admin endpoint to manage users (authorized)
+app.get('/admin/users', authenticate, authorizeAdmin, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT id, username, is_admin, created_at FROM users');
+    return res.status(200).json(result.rows);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send('Error fetching users.');
+  }
+});
+
+// Admin endpoint to manage emails (authorized)
+app.get('/admin/emails', authenticate, authorizeAdmin, async (req, res) => {
+  // Placeholder for email management logic
+  res.status(200).send('List of emails');
 });
 
 app.listen(port, () => {
