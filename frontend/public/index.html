@@ -14,10 +14,23 @@
       align-items: center;
       height: 100vh;
       margin: 0;
-      background-color: #f0f0f0;
+      background: linear-gradient(45deg, rgba(255, 255, 255, 0.2), rgba(240, 240, 240, 0.2));
+      animation: gradient 10s infinite linear;
     }
     h1 {
       font-weight: 800;
+      font-size: 4rem;
+    }
+    @keyframes gradient {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
     }
   </style>
 </head>
