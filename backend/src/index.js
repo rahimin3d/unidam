@@ -24,7 +24,7 @@ app.get('/api/contacts', async (req, res) => {
     const result = await pool.query('SELECT * FROM contacts');
     res.json(result.rows);
   } catch (error) {
-    console.error(error);
+    console.error('Error retrieving data from database:', error);
     res.status(500).send('Error retrieving data from database');
   }
 });
