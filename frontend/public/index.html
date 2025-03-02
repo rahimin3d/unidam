@@ -10,6 +10,7 @@
       font-family: 'Mulish', sans-serif;
       color: #353841;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       height: 100vh;
@@ -20,6 +21,11 @@
     h1 {
       font-weight: 800;
       font-size: 4rem;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+      font-size: 1.5rem;
     }
     @keyframes gradient {
       0% {
@@ -36,5 +42,20 @@
 </head>
 <body>
   <h1>Welcome to UniDAM</h1>
+  <ul id="data-list"></ul>
+  <script>
+    async function fetchData() {
+      const response = await fetch('/api/data');
+      const data = await response.json();
+      const dataList = document.getElementById('data-list');
+      data.forEach(item => {
+        const listItem = document.createElement('li');
+        listItem.textContent = item.name;
+        dataList.appendChild(listItem);
+      });
+    }
+
+    fetchData();
+  </script>
 </body>
 </html>
