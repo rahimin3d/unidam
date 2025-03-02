@@ -22,10 +22,19 @@
       font-weight: 800;
       font-size: 4rem;
     }
-    ul {
-      list-style-type: none;
-      padding: 0;
-      font-size: 1.5rem;
+    table {
+      border-collapse: collapse;
+      width: 80%;
+      margin-top: 20px;
+      font-size: 1.2rem;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
     }
     @keyframes gradient {
       0% {
@@ -42,20 +51,33 @@
 </head>
 <body>
   <h1>Welcome to UniDAM</h1>
-  <ul id="data-list"></ul>
+  <table id="contacts-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Phone</th>
+        <th>Email</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
   <script>
-    async function fetchData() {
-      const response = await fetch('/api/data');
+    async function fetchContacts() {
+      const response = await fetch('/api/contacts');
       const data = await response.json();
-      const dataList = document.getElementById('data-list');
-      data.forEach(item => {
-        const listItem = document.createElement('li');
-        listItem.textContent = item.name;
-        dataList.appendChild(listItem);
+      const tableBody = document.querySelector('#contacts-table tbody');
+      data.forEach(contact => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${contact.name}</td>
+          <td>${contact.phone}</td>
+          <td>${contact.email}</td>
+        `;
+        tableBody.appendChild(row);
       });
     }
 
-    fetchData();
+    fetchContacts();
   </script>
 </body>
 </html>

@@ -18,9 +18,9 @@ const pool = new Pool({
 app.use(express.static(path.join(__dirname, '../../frontend/public')));
 
 // Get data from the database
-app.get('/api/data', async (req, res) => {
+app.get('/api/contacts', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM test_table');
+    const result = await pool.query('SELECT * FROM contacts');
     res.json(result.rows);
   } catch (error) {
     console.error(error);
